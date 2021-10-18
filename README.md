@@ -79,8 +79,10 @@ profiler intel vtune : https://www.intel.com/content/www/us/en/develop/documenta
 
 ## gprofile
 Setup of gprofile
-
-mkdir build
-cd build
+```
+mkdir build 
+cd build 
 cmake -DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg ..
 make
+```
+The result of running gprofile on the default code can be found in the file `gprofil_default_code_analysis.txt`.
