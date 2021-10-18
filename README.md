@@ -76,3 +76,11 @@ This project is licensed under the GPLv2 License
 
 profiler gpu nivdea : https://developer.nvidia.com/nsight-systems
 profiler intel vtune : https://www.intel.com/content/www/us/en/develop/documentation/get-started-with-vtune/top.html 
+
+## gprofile
+Setup of gprofile
+
+mkdir build
+cd build
+cmake -DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg ..
+make
