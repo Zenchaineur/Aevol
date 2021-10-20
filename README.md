@@ -86,3 +86,7 @@ cmake -DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_F
 make
 ```
 The result of running gprofile on the default code can be found in the file `gprofil_default_code_analysis.txt`.
+
+## version explanation
+- v1_0: base version of Aevol as provided by the project instructor
+- v1_1: in function `Dna:terminator_at(int pos)` the `length()` of the `_seq` array function is called multiple times in a for loop, while the array length stays constant. Therefore the array length is computed and stored once before the for loop. The total computing time is reduced by about 15%

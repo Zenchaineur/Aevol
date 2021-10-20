@@ -166,14 +166,16 @@ int Dna::promoter_at(int pos) {
 // Given a, b, c, d boolean variable and X random boolean variable,
 // a terminator look like : a b c d X X !d !c !b !a
 int Dna::terminator_at(int pos) {
+    // store value of length() in variable _length before the loop
+    const int _length = length();
     int term_dist[TERM_STEM_SIZE];
     for (int motif_id = 0; motif_id < TERM_STEM_SIZE; motif_id++) {
         int right = pos + motif_id;
         int left = pos + (TERM_SIZE - 1) - motif_id;
 
         // loop back the dna inf needed
-        if (right >= length()) right -= length();
-        if (left >= length()) left -= length();
+        if (right >= _length) right -= _length;
+        if (left >= _length) left -= _length;
 
         // Search for the terminators
         term_dist[motif_id] = seq_[right] != seq_[left] ? 1 : 0;
