@@ -28,13 +28,13 @@
 
 #include <iostream>
 #include <zlib.h>
+#include <omp.h>
 
 using namespace std;
 
 #include "ExpManager.h"
 #include "AeTime.h"
 #include "Gaussian.h"
-
 // For time tracing
 #include "Timetracer.h"
 
@@ -363,18 +363,30 @@ void ExpManager::prepare_mutation(int indiv_id) const {
  */
 void ExpManager::run_a_step() {
 
-    // Running the simulation process for each organism
-    for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
-        selection(indiv_id);
-        prepare_mutation(indiv_id);
+    /*
+    * Tried out adding a parallelization mechanism. The result is the same as with no parallelization.
+    * However, including this parallelization increases the execution time of the program.
+    * Potentially related to the threads copying data, which creates too much overhead.
+    */
+    #pragma omp parallel shared(internal_organisms_, dna_mutator_array_)
+    {
+        int thread_id = omp_get_thread_num();
+        int num_threads = omp_get_num_threads();
+        int begin = floor(thread_id * (nb_indivs_ / num_threads));
+        int end = ceil((thread_id+1) * (nb_indivs_ / num_threads));
+        end = end > nb_indivs_ ? nb_indivs_ : end;
 
-        if (dna_mutator_array_[indiv_id]->hasMutate()) {
-            auto &mutant = internal_organisms_[indiv_id];
-            mutant->apply_mutations(dna_mutator_array_[indiv_id]->mutation_list_);
-            mutant->evaluate(target);
+        // Running the simulation process for each organism
+        for (int indiv_id = begin; indiv_id < end; indiv_id++) {
+            selection(indiv_id);
+            prepare_mutation(indiv_id);
+            if (dna_mutator_array_[indiv_id]->hasMutate()) {
+                auto &mutant = internal_organisms_[indiv_id];
+                mutant->apply_mutations(dna_mutator_array_[indiv_id]->mutation_list_);
+                mutant->evaluate(target);
+            }
         }
     }
-
     // Swap Population
     for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
         prev_internal_organisms_[indiv_id] = internal_organisms_[indiv_id];
