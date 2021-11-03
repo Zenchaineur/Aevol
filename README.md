@@ -108,3 +108,25 @@ Thus, we do not keep this modification.
 
 ### Mario
 * Search for optimizations on `Organism::compute_phenotype` and `Organism::compute_fitness`
+
+## Tests
+
+### `bin/timetest.sh`
+
+Usage :
+```bash
+bin/timetest.sh -n 500 # any argument given to the script will be forwarded to the Aevol executable
+```
+
+This script requires a GNU-compliant version of the `time` command. It is most frequently located at `/usr/bin/time` and is the default location used by the script.
+If it is elsewhere, you can override the default value like this :
+```bash
+TIME_EXEC=/path/to/time bin/timetest.sh
+```
+
+In a similar way, you can adjust the number of executions for every branch :
+```bash
+AMOUNT_TESTS=2 bin/timetest.sh
+```
+
+You can also combine these options.
