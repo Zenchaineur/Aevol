@@ -29,6 +29,7 @@
 #include <iostream>
 #include <zlib.h>
 #include <omp.h>
+#include <string>
 
 using namespace std;
 
@@ -368,25 +369,28 @@ void ExpManager::run_a_step() {
     * However, including this parallelization increases the execution time of the program.
     * Potentially related to the threads copying data, which creates too much overhead.
     */
-    #pragma omp parallel shared(internal_organisms_, dna_mutator_array_)
-    {
-        int thread_id = omp_get_thread_num();
-        int num_threads = omp_get_num_threads();
-        int begin = floor(thread_id * (nb_indivs_ / num_threads));
-        int end = ceil((thread_id+1) * (nb_indivs_ / num_threads));
-        end = end > nb_indivs_ ? nb_indivs_ : end;
-
+    // #pragma omp parallel shared(internal_organisms_, dna_mutator_array_)
+    // {
+    //     int thread_id = omp_get_thread_num();
+    //     int num_threads = omp_get_num_threads();
+    //     int begin = floor(thread_id * (nb_indivs_ / num_threads));
+    //     int end = ceil((thread_id+1) * (nb_indivs_ / num_threads));
+    //     end = end > nb_indivs_ ? nb_indivs_ : end;
         // Running the simulation process for each organism
-        for (int indiv_id = begin; indiv_id < end; indiv_id++) {
-            selection(indiv_id);
-            prepare_mutation(indiv_id);
-            if (dna_mutator_array_[indiv_id]->hasMutate()) {
-                auto &mutant = internal_organisms_[indiv_id];
-                mutant->apply_mutations(dna_mutator_array_[indiv_id]->mutation_list_);
-                mutant->evaluate(target);
-            }
+    #pragma omp parallel for schedule(dynamic)
+    for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
+        // select new individual from neighboring cells based on their fitness.
+        selection(indiv_id);
+        // create switch mutation based on a binomial distribution
+        prepare_mutation(indiv_id);
+        if (dna_mutator_array_[indiv_id]->hasMutate()) {
+            auto &mutant = internal_organisms_[indiv_id];
+            mutant->apply_mutations(dna_mutator_array_[indiv_id]->mutation_list_);
+            mutant->evaluate(target);
         }
     }
+//        std::cout << "Thread_number: " << thread_id << " begin: " << to_string(begin) << " end: " << to_string(end) << std::endl;#
+    // }
     // Swap Population
     for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
         prev_internal_organisms_[indiv_id] = internal_organisms_[indiv_id];

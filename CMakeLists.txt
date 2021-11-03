@@ -27,6 +27,8 @@ if ( USE_CUDA )
     else()
         message(FATAL_ERROR "No CUDA support found")
     endif()
+else ()
+    message(NOTICE "Not using CUDA")
 endif ( USE_CUDA )
 
 if ( USE_OMP )
