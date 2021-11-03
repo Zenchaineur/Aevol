@@ -86,11 +86,14 @@ cmake -DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_F
 make
 ```
 The result of running gprofile on the default code can be found in the file `gprofil_default_code_analysis.txt`.
+When using `omg parallel for` the `-pg` compiler flags should not be used, as this significantly increases the overhead when creating threads.
+Therefore use `cmake -DUSE_OMP=On ..`. To evaluate the performance of the program in release mode use `-DCMAKE_BUILD_TYPE=Release`
+
 
 ## version explanation
 - v1_0: base version of Aevol as provided by the project instructor
 - v1_1: in function `Dna:terminator_at(int pos)` the `length()` of the `_seq` array function is called multiple times in a for loop, while the array length stays constant. Therefore the array length is computed and stored once before the for loop. The total computing time is reduced by about 15%
-- parallelization_run_a_step_sebastian (sebastian, branch): In this branch the for loop which updates the simulation in the function run_a_step in ExpManager is parallelized with `pragma for parallel`. Initially the performance was lower, due to the overhead of cloning the threads. We then realized this depends on the used cmake compiler flags We used `-DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg`. This decreased performance only appears when using the `-pg` flag. When compiling without these compiler flags, so compiling with `cmake -DUSE_OMP=On ..`, one can see an improvement. The computation time is roughly decreased about 30% in comparison to the old computation.
+- parallelization_run_a_step_sebastian (sebastian, branch): In this branch the for loop which updates the simulation in the function run_a_step in ExpManager is parallelized with `pragma omp parallel for`. Initially the performance was lower, due to the overhead of cloning the threads. We then realized this depends on the used cmake compiler flags We used `-DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg`. This decreased performance only appears when using the `-pg` flag. When compiling without these compiler flags, so compiling with `cmake -DUSE_OMP=On ..`, one can see an improvement. The computation time is roughly decreased about 30% in comparison to the old computation.
 - parallelization_promoter_at (branch, Florian) : Profiling results showed that `Dna::promoter_at(int)` was taking a considerable part of
 the program's execution time. As a result we tried to parallelize it with OpenMP and see if it could help. The execution time of the function itself was divided by 2, but the overhead caused by thread cloning was too important. Even though we maximized variable sharing, the total execution time went higher than before. Furthermore, the higher the number of threads was, the more time we lost to thread cloning.
 Thus, we do not keep this modification.
