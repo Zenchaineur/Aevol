@@ -94,3 +94,14 @@ The result of running gprofile on the default code can be found in the file `gpr
 - parallelization_promoter_at (branch, Florian) : Profiling results showed that `Dna::promoter_at(int)` was taking a considerable part of
 the program's execution time. As a result we tried to parallelize it with OpenMP and see if it could help. The execution time of the function itself was divided by 2, but the overhead caused by thread cloning was too important. Even though we maximized variable sharing, the total execution time went higher than before. Furthermore, the higher the number of threads was, the more time we lost to thread cloning.
 Thus, we do not keep this modification.
+
+## Todos
+
+### Florian
+* Search for optimizations on `Organism::compute_RNA` and `Organism::search_start_protein`
+
+### Sebastian
+* Search for optimizations on `Organism::compute_protein` and `Organism::translate_protein`
+
+### Mario
+* Search for optimizations on `Organism::compute_phenotype` and `Organism::compute_fitness`
