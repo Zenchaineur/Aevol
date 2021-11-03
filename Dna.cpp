@@ -5,6 +5,8 @@
 #include "Dna.h"
 
 #include <cassert>
+#include <omp.h>
+#include <cmath>
 
 Dna::Dna(int length, Threefry::Gen &&rng) : seq_(length) {
     // Generate a random genome
@@ -124,8 +126,10 @@ void Dna::do_duplication(int pos_1, int pos_2, int pos_3) {
 
 int Dna::promoter_at(int pos) {
     int prom_dist[PROM_SIZE];
-
+    
+    #pragma omp simd
     for (int motif_id = 0; motif_id < PROM_SIZE; motif_id++) {
+        
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size())
             search_pos -= seq_.size();
@@ -137,28 +141,12 @@ int Dna::promoter_at(int pos) {
 
 
     // Computing if a promoter exists at that position
-    int dist_lead = prom_dist[0] +
-                    prom_dist[1] +
-                    prom_dist[2] +
-                    prom_dist[3] +
-                    prom_dist[4] +
-                    prom_dist[5] +
-                    prom_dist[6] +
-                    prom_dist[7] +
-                    prom_dist[8] +
-                    prom_dist[9] +
-                    prom_dist[10] +
-                    prom_dist[11] +
-                    prom_dist[12] +
-                    prom_dist[13] +
-                    prom_dist[14] +
-                    prom_dist[15] +
-                    prom_dist[16] +
-                    prom_dist[17] +
-                    prom_dist[18] +
-                    prom_dist[19] +
-                    prom_dist[20] +
-                    prom_dist[21];
+    int dist_lead = 0;
+    #pragma omp simd reduction(+:dist_lead)
+    for(int i = 0; i < PROM_SIZE; ++i) {
+        dist_lead += prom_dist[i];
+    }
+    
 
     return dist_lead;
 }
