@@ -506,6 +506,7 @@ void Organism::compute_phenotype() {
     double activ_phenotype[FUZZY_SAMPLING]{};
     double inhib_phenotype[FUZZY_SAMPLING]{};
 
+    #pragma omp parallel for (dynamic)
     for (int protein_idx = 0; protein_idx < protein_count_; protein_idx++) {
         const auto* protein = proteins[protein_idx];
         if (protein->is_init_ && protein->is_functional) {
@@ -524,25 +525,31 @@ void Organism::compute_phenotype() {
             auto* local_phenotype = protein->h > 0 ? activ_phenotype : inhib_phenotype;
 
             // Compute the first equation of the triangle
-            double slope = height / (double)(ix1 - ix0);
-            double y_intercept = -(double)ix0 * slope;
+            double slope1 = height / (double)(ix1 - ix0);
+            double y_intercept1 = -(double)ix0 * slope1;
 
+
+            // Compute the second equation of the triangle
+            double slope2 = height / (double)(ix1 - ix2);
+            double y_intercept2 = -(double)ix2 * slope2;
+
+
+            #pragma omp critical
+            {
             // Updating value between x0 and x1
             for (int i = ix0; i < ix1; i++) {
                 if(i >= 0) {
-                    local_phenotype[i] += slope * (double)i + y_intercept;
+                    local_phenotype[i] += slope1 * (double)i + y_intercept1;
                 }
             }
 
-            // Compute the second equation of the triangle
-            slope = height / (double)(ix1 - ix2);
-            y_intercept = -(double)ix2 * slope;
 
             // Updating value between x1 and x2
             for (int i = ix1; i < ix2; i++) {
                 if(i < FUZZY_SAMPLING) {
-                    local_phenotype[i] += slope * (double)i + y_intercept;
+                    local_phenotype[i] += slope2 * (double)i + y_intercept2;
                 }
+            }
             }
         }
     }
