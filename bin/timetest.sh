@@ -5,7 +5,7 @@
 TIME_EXEC="${TIME_EXEC:-/usr/bin/time}"
 AMOUNT_TESTS="${AMOUNT_TESTS:-10}"
 
-REF_LIST=(master parallelization_run_a_step_sebastian)
+REF_LIST=(mg-parallelization)
 
 function _change_ref() {
     REF="$1"
