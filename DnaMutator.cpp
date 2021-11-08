@@ -49,6 +49,7 @@ void DnaMutator::generate_mutations() {
     nb_mut_ = mut_prng_->binomial_random(length_, mutation_rate_);
 
     if (nb_mut_ > 0) {
+        #pragma omp parallel for schedule(dynamic)
         for (int i = 0; i < nb_mut_; ++i) {
             generate_next_mutation(length_);
         }

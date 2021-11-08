@@ -1,3 +1,0 @@
-cpu_s real_s
-Command exited with non-zero status 127
-0.00 0.00
