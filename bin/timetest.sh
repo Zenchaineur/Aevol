@@ -6,6 +6,7 @@ TIME_EXEC="${TIME_EXEC:-/usr/bin/time}"
 AMOUNT_TESTS="${AMOUNT_TESTS:-10}"
 
 REF_LIST=(master parallelization_run_a_step_sebastian)
+#REF_LIST=(master parallelization_run_a_step_sebastian)
 
 function _change_ref() {
     REF="$1"
@@ -36,7 +37,7 @@ function _build_and_prepare() {
     # Prepare for results
     mkdir -p ${PROJECT_DIR}/timetest_results
     rm -f ${PROJECT_DIR}/timetest_results/${ref}_results.txt
-    echo 'cpu_s real_s' >> ${PROJECT_DIR}/timetest_results/${ref}_results.txt
+    echo 'cpu_s, real_s' >> ${PROJECT_DIR}/timetest_results/${ref}_results.txt
 
 }
 
@@ -44,7 +45,7 @@ function _execute_test() {
     i=0
     while [[ $i -lt ${AMOUNT_TESTS} ]]; do
         echo "Référence Git : $ref Exécution : $i"
-        ${TIME_EXEC} -f "%U %e" --output=${PROJECT_DIR}/timetest_results/${ref}_results.txt --append ./micro_aevol_cpu "$@" > /dev/null
+        ${TIME_EXEC} -f "%U,%e" --output=${PROJECT_DIR}/timetest_results/${ref}_results.csv --append ./micro_aevol_cpu "$@" > /dev/null
         if [[ $? -ne 0 ]]; then
             break
         fi
