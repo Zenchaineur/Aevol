@@ -124,7 +124,6 @@ void Dna::do_duplication(int pos_1, int pos_2, int pos_3) {
 
 int Dna::promoter_at(int pos) {
     int prom_dist[PROM_SIZE];
-
     for (int motif_id = 0; motif_id < PROM_SIZE; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size())
