@@ -145,6 +145,9 @@ void Organism::compute_protein_stats() {
 
 /** LOOK **/
 void Organism::locate_promoters() {
+    if (!dna_changed) {
+        return;
+    }
     look_for_new_promoters_starting_between(0, length());
 }
 
@@ -161,6 +164,7 @@ void Organism::apply_mutations(const list<MutationEvent *> &mutation_list) {
                 break;
         }
     }
+    dna_changed = true;
 }
 
 void Organism::evaluate(const double *target) {
@@ -173,12 +177,14 @@ void Organism::evaluate(const double *target) {
 }
 
 void Organism::compute_RNA() {
+    if (!dna_changed) {
+        return;
+    }
     proteins.clear();
     rnas.clear();
     terminators.clear();
 
     rnas.resize(promoters_.size());
-
     for (const auto &prom_pair: promoters_) {
         int prom_pos = prom_pair.first;
 

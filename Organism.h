@@ -87,6 +87,7 @@ public:
     double metaerror = 0.0;
 
     Dna *dna_ = nullptr;
+    bool dna_changed = true;
 
     int protein_count_ = 0;
     int rna_count_ = 0;
