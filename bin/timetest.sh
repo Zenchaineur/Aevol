@@ -29,9 +29,9 @@ function _build_and_prepare() {
     cd ${PROJECT_DIR}/build
     rm -rf ./*
     echo "Exécution de CMake"
-    cmake -DUSE_OMP=ON -DCMAKE_BUILD_TYPE=Release .. &> /dev/null
+    cmake -DUSE_OMP=ON -DCMAKE_BUILD_TYPE=Release .. 
     echo "Build de l'application"
-    make &> /dev/null
+    make
 
     # Prepare for results
     mkdir -p ${PROJECT_DIR}/timetest_results

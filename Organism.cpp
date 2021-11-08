@@ -506,7 +506,7 @@ void Organism::compute_phenotype() {
     double activ_phenotype[FUZZY_SAMPLING]{};
     double inhib_phenotype[FUZZY_SAMPLING]{};
 
-    #pragma omp parallel for (dynamic)
+    #pragma omp parallel for schedule(dynamic)
     for (int protein_idx = 0; protein_idx < protein_count_; protein_idx++) {
         const auto* protein = proteins[protein_idx];
         if (protein->is_init_ && protein->is_functional) {

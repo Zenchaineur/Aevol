@@ -125,6 +125,7 @@ void Dna::do_duplication(int pos_1, int pos_2, int pos_3) {
 int Dna::promoter_at(int pos) {
     int prom_dist[PROM_SIZE];
 
+    #pragma omp parallel for shared(pos, prom_dist, seq_) schedule(auto)
     for (int motif_id = 0; motif_id < PROM_SIZE; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size())
