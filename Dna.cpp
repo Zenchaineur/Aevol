@@ -125,7 +125,6 @@ void Dna::do_duplication(int pos_1, int pos_2, int pos_3) {
 int Dna::promoter_at(int pos) {
     int prom_dist[PROM_SIZE];
 
-    #pragma omp parallel for shared(pos, prom_dist, seq_) schedule(auto)
     for (int motif_id = 0; motif_id < PROM_SIZE; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size())
@@ -192,12 +191,13 @@ int Dna::terminator_at(int pos) {
 bool Dna::shine_dal_start(int pos) {
     bool start = false;
     int t_pos, k_t;
+    int size = seq_.size();
 
     for (int k = 0; k < SHINE_DAL_SIZE + CODON_SIZE; k++) {
         k_t = k >= SHINE_DAL_SIZE ? k + SD_START_SPACER : k;
         t_pos = pos + k_t;
-        if (t_pos >= seq_.size())
-            t_pos -= seq_.size();
+        if (t_pos >= size)
+            t_pos -= size;
 
         if (seq_[t_pos] == SHINE_DAL_SEQ[k_t]) {
             start = true;
@@ -213,11 +213,11 @@ bool Dna::shine_dal_start(int pos) {
 bool Dna::protein_stop(int pos) {
     bool is_protein;
     int t_k;
-
+    int size = seq_.size();
     for (int k = 0; k < CODON_SIZE; k++) {
         t_k = pos + k;
-        if (t_k >= seq_.size())
-            t_k -= seq_.size();
+        if (t_k >= size)
+            t_k -= size;
 
         if (seq_[t_k] == PROTEIN_END[k]) {
             is_protein = true;
@@ -234,11 +234,12 @@ int Dna::codon_at(int pos) {
     int value = 0;
 
     int t_pos;
+    int size = seq_.size();
 
     for (int i = 0; i < CODON_SIZE; i++) {
         t_pos = pos + i;
-        if (t_pos >= seq_.size())
-            t_pos -= seq_.size();
+        if (t_pos >= size)
+            t_pos -= size;
         if (seq_[t_pos] == '1')
             value += 1 << (CODON_SIZE - i - 1);
     }
