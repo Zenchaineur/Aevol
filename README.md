@@ -105,6 +105,7 @@ Thus, we do not keep this modification.
 
 ### Sebastian
 * I also try to have a look at `Organism::compute_RNA`. My goal is to improve this function not by using OpenMP but instead restructuring the whole approach of the function. For example only letting it check for new terminators when the values itself changed.
+* Try parallelizing with `pragma omp simd`
 
 ### Mario
 * Search for optimizations on `Organism::compute_phenotype` and `Organism::compute_fitness`
