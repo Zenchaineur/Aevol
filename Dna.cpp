@@ -5,6 +5,7 @@
 #include "Dna.h"
 
 #include <cassert>
+#include <bitset>
 
 Dna::Dna(int length, Threefry::Gen &&rng) : seq_(length) {
     // Generate a random genome
@@ -123,42 +124,16 @@ void Dna::do_duplication(int pos_1, int pos_2, int pos_3) {
 }
 
 int Dna::promoter_at(int pos) {
-    int prom_dist[PROM_SIZE];
-
+    
+    int dist_lead = 0;
     for (int motif_id = 0; motif_id < PROM_SIZE; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size())
             search_pos -= seq_.size();
         // Searching for the promoter
-        prom_dist[motif_id] =
-                PROM_SEQ[motif_id] == seq_[search_pos] ? 0 : 1;
-
+        //prom_dist.set(motif_id, PROM_SEQ[motif_id] != seq_[search_pos]);
+        if(PROM_SEQ[motif_id] != seq_[search_pos]) dist_lead++;
     }
-
-
-    // Computing if a promoter exists at that position
-    int dist_lead = prom_dist[0] +
-                    prom_dist[1] +
-                    prom_dist[2] +
-                    prom_dist[3] +
-                    prom_dist[4] +
-                    prom_dist[5] +
-                    prom_dist[6] +
-                    prom_dist[7] +
-                    prom_dist[8] +
-                    prom_dist[9] +
-                    prom_dist[10] +
-                    prom_dist[11] +
-                    prom_dist[12] +
-                    prom_dist[13] +
-                    prom_dist[14] +
-                    prom_dist[15] +
-                    prom_dist[16] +
-                    prom_dist[17] +
-                    prom_dist[18] +
-                    prom_dist[19] +
-                    prom_dist[20] +
-                    prom_dist[21];
 
     return dist_lead;
 }
