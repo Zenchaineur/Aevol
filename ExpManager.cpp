@@ -392,6 +392,7 @@ void ExpManager::run_a_step() {
 //        std::cout << "Thread_number: " << thread_id << " begin: " << to_string(begin) << " end: " << to_string(end) << std::endl;#
     // }
     // Swap Population
+    #pragma omp parallel for schedule(dynamic)
     for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
         prev_internal_organisms_[indiv_id] = internal_organisms_[indiv_id];
         internal_organisms_[indiv_id] = nullptr;
@@ -400,6 +401,7 @@ void ExpManager::run_a_step() {
     // Search for the best
     double best_fitness = prev_internal_organisms_[0]->fitness;
     int idx_best = 0;
+    #pragma omp parallel for schedule(dynamic)
     for (int indiv_id = 1; indiv_id < nb_indivs_; indiv_id++) {
         if (prev_internal_organisms_[indiv_id]->fitness > best_fitness) {
             idx_best = indiv_id;
@@ -411,7 +413,7 @@ void ExpManager::run_a_step() {
     // Stats
     stats_best->reinit(AeTime::time());
     stats_mean->reinit(AeTime::time());
-
+    #pragma omp parallel for schedule(dynamic)
     for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
         if (dna_mutator_array_[indiv_id]->hasMutate())
             prev_internal_organisms_[indiv_id]->compute_protein_stats();
