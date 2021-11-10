@@ -143,7 +143,7 @@ int Dna::promoter_at(int pos) {
 int Dna::terminator_at(int pos) {
     // store value of length() in variable _length before the loop
     const int _length = length();
-    int term_dist[TERM_STEM_SIZE];
+    int dist_term_lead = 0;
     for (int motif_id = 0; motif_id < TERM_STEM_SIZE; motif_id++) {
         int right = pos + motif_id;
         int left = pos + (TERM_SIZE - 1) - motif_id;
@@ -153,12 +153,8 @@ int Dna::terminator_at(int pos) {
         if (left >= _length) left -= _length;
 
         // Search for the terminators
-        term_dist[motif_id] = seq_[right] != seq_[left] ? 1 : 0;
+        if(seq_[right] != seq_[left]) dist_term_lead++;
     }
-    int dist_term_lead = term_dist[0] +
-                         term_dist[1] +
-                         term_dist[2] +
-                         term_dist[3];
 
     return dist_term_lead;
 }
