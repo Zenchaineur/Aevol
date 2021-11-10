@@ -566,7 +566,7 @@ void Organism::compute_phenotype() {
 
 void Organism::compute_fitness(const double *target) {
     metaerror = 0.0;
-
+    #pragma omp simd reduction(+: metaerror)
     for (int fuzzy_idx = 0; fuzzy_idx < FUZZY_SAMPLING; fuzzy_idx++) {
         delta[fuzzy_idx] = fabs(phenotype[fuzzy_idx] - target[fuzzy_idx]);
         delta[fuzzy_idx] /= (double) FUZZY_SAMPLING;
