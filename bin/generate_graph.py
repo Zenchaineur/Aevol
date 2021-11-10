@@ -33,6 +33,8 @@ def generate_graph():
     ax1.set_title(m.group(2) + " " + m.group(3) + " itérations")
     ax1.boxplot(joined_data, labels=joined_labels)
     
+    plt.savefig("graph.png")
     plt.show()
-    
+
+
 generate_graph()
