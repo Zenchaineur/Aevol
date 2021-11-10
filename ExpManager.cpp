@@ -376,6 +376,7 @@ void ExpManager::run_a_step() {
     }
 
     // Swap Population
+    #pragma omp for schedule(dynamic)
     for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
         prev_internal_organisms_[indiv_id] = internal_organisms_[indiv_id];
         internal_organisms_[indiv_id] = nullptr;
