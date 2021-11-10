@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+import re
 import csv
 
 
@@ -21,13 +22,15 @@ def generate_graph():
     joined_data = []
     joined_labels = []
     for file_path in sys.argv[1::]:
-        data = _parse_data(file_path=file_path, column="cpu_s")
+        data = _parse_data(file_path=file_path, column="real_s")
         joined_data.append(data)
-        joined_labels.append(file_path)
+        p = re.compile("([a-zA-Z_].*)_(Debug|Release)_([0-9]*)its")
+        m = p.match(file_path)
+        joined_labels.append(m.group(1))
         
     print(joined_data)
     fig1, ax1 = plt.subplots()
-    ax1.set_title(file_path)
+    ax1.set_title(m.group(2) + " " + m.group(3) + " itérations")
     ax1.boxplot(joined_data, labels=joined_labels)
     
     plt.show()
