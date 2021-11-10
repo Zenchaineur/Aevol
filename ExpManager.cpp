@@ -432,13 +432,7 @@ void ExpManager::run_a_step() {
 void ExpManager::run_evolution(int nb_gen) {
     INIT_TRACER("trace.csv", {"FirstEvaluation", "STEP"});
 
-    TIMESTAMP(0, {
-        for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
-            internal_organisms_[indiv_id]->locate_promoters();
-            prev_internal_organisms_[indiv_id]->evaluate(target);
-            prev_internal_organisms_[indiv_id]->compute_protein_stats();
-        }
-    });
+    TIMESTAMP(0, do_first_evaluation());
     FLUSH_TRACES(0)
 
     // Stats
@@ -466,4 +460,14 @@ void ExpManager::run_evolution(int nb_gen) {
         }
     }
     STOP_TRACER
+}
+
+
+void ExpManager::do_first_evaluation(){
+    #pragma omp parallel for schedule(dynamic)
+    for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
+        internal_organisms_[indiv_id]->locate_promoters();
+        prev_internal_organisms_[indiv_id]->evaluate(target);
+        prev_internal_organisms_[indiv_id]->compute_protein_stats();
+    }
 }

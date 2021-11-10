@@ -57,6 +57,8 @@ public:
 
     void run_evolution(int nb_gen) override;
 
+    void do_first_evaluation();
+
 private:
     void run_a_step();
 
