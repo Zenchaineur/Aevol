@@ -179,7 +179,7 @@ void Organism::compute_RNA() {
 
     rnas.resize(promoters_.size());
 
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic)
     for (const auto &prom_pair: promoters_) {
         int prom_pos = prom_pair.first;
 
@@ -232,7 +232,7 @@ void Organism::compute_RNA() {
 }
 
 void Organism::search_start_protein() {
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic)
     for (int rna_idx = 0; rna_idx < rna_count_; rna_idx++) {
         const auto &rna = rnas[rna_idx];
         int c_pos = rna->begin;
@@ -263,7 +263,7 @@ void Organism::compute_protein() {
 
     proteins.resize(resize_to);
 
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic)
     for (int rna_idx = 0; rna_idx < rna_count_; rna_idx++) {
         auto* rna = rnas[rna_idx];
         int transcribed_start = rna->begin + PROM_SIZE;
@@ -319,7 +319,7 @@ void Organism::compute_protein() {
 }
 
 void Organism::translate_protein() {
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic)
     for (int protein_idx = 0; protein_idx < protein_count_; protein_idx++) {
         auto* protein = proteins[protein_idx];
         if (protein->is_init_) {
@@ -512,7 +512,7 @@ void Organism::compute_phenotype() {
     double inhib_phenotype[FUZZY_SAMPLING]{};
 
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
     for (int protein_idx = 0; protein_idx < protein_count_; protein_idx++) {
         const auto* protein = proteins[protein_idx];
         if (protein->is_init_ && protein->is_functional) {
@@ -574,7 +574,7 @@ void Organism::compute_phenotype() {
 void Organism::compute_fitness(const double *target) {
     metaerror = 0.0;
 
-    #pragma omp simd reduction (+: metaerror)
+    #pragma omp parallel for schedule(dynamic)
     for (int fuzzy_idx = 0; fuzzy_idx < FUZZY_SAMPLING; fuzzy_idx++) {
         delta[fuzzy_idx] = fabs(phenotype[fuzzy_idx] - target[fuzzy_idx]);
         delta[fuzzy_idx] /= (double) FUZZY_SAMPLING;
