@@ -3,12 +3,12 @@
 # runs it with the same set of parameters and returns a summary
 
 TIME_EXEC="${TIME_EXEC:-/usr/bin/time}"
-AMOUNT_TESTS="${AMOUNT_TESTS:-10}"
+AMOUNT_TESTS="${AMOUNT_TESTS:-20}"
 AMOUNT_ITERATIONS="${AMOUNT_ITERATIONS:-1000}"
 
 #REF_LIST=(master parallelization_run_a_step_sebastian parallelization_promoter_at)
 #REF_LIST=(master parallelization_run_a_step_sebastian)
-REF_LIST=(master parallelization_promoter_at)
+REF_LIST=(master seq_to_bitset_skerres)
 
 function _change_ref() {
     REF="$1"

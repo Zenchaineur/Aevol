@@ -1,6 +1,8 @@
 //
 // Created by elturpin on 04/12/2020.
 //
+#ifndef AEVOL_CONSTANTS_HEADER
+#define AEVOL_CONSTANTS_HEADER
 
 #pragma once
 
@@ -11,7 +13,8 @@ constexpr int8_t CODON_SIZE = 3;
 // promoter
 constexpr int8_t PROM_MAX_DIFF = 4;
 constexpr int8_t PROM_SIZE = 22;
-constexpr const char *PROM_SEQ = "0101011001110010010110";
+// constexpr const char *PROM_SEQ = "0101011001110010010110";
+constexpr std::bitset<22> prom_bitset{0b0101011001110010010110};
 // terminator
 constexpr int8_t TERM_STEM_SIZE = 4;
 constexpr int8_t TERM_LOOP_SIZE = 3;
@@ -21,8 +24,11 @@ constexpr int8_t SHINE_DAL_SIZE = 6;
 constexpr int8_t SD_START_SPACER = 4;
 constexpr int8_t SD_TO_START = SHINE_DAL_SIZE + SD_START_SPACER + CODON_SIZE;
 constexpr const char *SHINE_DAL_SEQ = "011011****000";
+constexpr std::bitset<22> shine_dal_bitset{0b0110110000000};
 // stop
-constexpr const char *PROTEIN_END = "001"; // CODON_STOP
+constexpr int8_t PROTEIN_END_SIZE = 3;
+// constexpr const char *PROTEIN_END = "001"; // CODON_STOP
+constexpr std::bitset<22> protein_end_bitset{0b001};
 
 constexpr int32_t DO_TRANSLATION_LOOP = SHINE_DAL_SIZE + SD_START_SPACER + 3 * CODON_SIZE;
 
@@ -53,3 +59,5 @@ constexpr int SELECTION_PRESSURE = 1000;
 constexpr int8_t NEIGHBORHOOD_WIDTH  = 3;
 constexpr int8_t NEIGHBORHOOD_HEIGHT = 3;
 constexpr int8_t NEIGHBORHOOD_SIZE   = NEIGHBORHOOD_HEIGHT * NEIGHBORHOOD_WIDTH;
+
+#endif // AEVOL_CONSTANTS_HEADER

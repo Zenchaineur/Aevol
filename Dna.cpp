@@ -8,8 +8,8 @@
 
 Dna::Dna(int length, Threefry::Gen &&rng) : seq_(length) {
     // Generate a random genome
-    for (int32_t i = 0; i < length; i++) {
-        seq_[i] = '0' + rng.random(NB_BASE);
+    for (int32_t i = length; i > 0; i--) {
+        seq_[i] = rng.random(NB_BASE);
     }
 }
 
@@ -20,7 +20,7 @@ int Dna::length() const {
 void Dna::save(gzFile backup_file) {
     int dna_length = length();
     gzwrite(backup_file, &dna_length, sizeof(dna_length));
-    gzwrite(backup_file, seq_.data(), dna_length * sizeof(seq_[0]));
+    gzwrite(backup_file, &seq_, dna_length * sizeof(seq_[0]));
 }
 
 void Dna::load(gzFile backup_file) {
@@ -30,12 +30,13 @@ void Dna::load(gzFile backup_file) {
     char tmp_seq[dna_length];
     gzread(backup_file, tmp_seq, dna_length * sizeof(tmp_seq[0]));
 
-    seq_ = std::vector<char>(tmp_seq, tmp_seq + dna_length);
+    // seq_ = std::bitset<5000>(tmp_seq, tmp_seq + dna_length);
 }
 
 void Dna::do_switch(int pos) {
-    if (seq_[pos] == '0') seq_[pos] = '1';
-    else seq_[pos] = '0';
+    seq_.flip(length() - pos - 1);
+    // if (seq_[pos] == '0') seq_[pos] = '1';
+    // else seq_[pos] = '0';
 }
 
 int Dna::promoter_at(int pos) {
@@ -47,7 +48,7 @@ int Dna::promoter_at(int pos) {
             search_pos -= seq_.size();
         // Searching for the promoter
         prom_dist[motif_id] =
-                PROM_SEQ[motif_id] == seq_[search_pos] ? 0 : 1;
+                prom_bitset[PROM_SIZE - motif_id - 1] == seq_[length() - search_pos - 1] ? 0 : 1;
 
     }
 
@@ -94,7 +95,7 @@ int Dna::terminator_at(int pos) {
         if (left >= _length) left -= _length;
 
         // Search for the terminators
-        term_dist[motif_id] = seq_[right] != seq_[left] ? 1 : 0;
+        term_dist[motif_id] = seq_[length() - right - 1] != seq_[length() - left - 1] ? 1 : 0;
     }
     int dist_term_lead = term_dist[0] +
                          term_dist[1] +
@@ -113,8 +114,7 @@ bool Dna::shine_dal_start(int pos) {
         t_pos = pos + k_t;
         if (t_pos >= seq_.size())
             t_pos -= seq_.size();
-
-        if (seq_[t_pos] == SHINE_DAL_SEQ[k_t]) {
+        if (seq_[length() - t_pos - 1] == shine_dal_bitset[SD_TO_START - k_t - 1]) {
             start = true;
         } else {
             start = false;
@@ -134,7 +134,7 @@ bool Dna::protein_stop(int pos) {
         if (t_k >= seq_.size())
             t_k -= seq_.size();
 
-        if (seq_[t_k] == PROTEIN_END[k]) {
+        if (seq_[length() - t_k - 1] == protein_end_bitset[PROTEIN_END_SIZE - k - 1]) {
             is_protein = true;
         } else {
             is_protein = false;
@@ -154,7 +154,7 @@ int Dna::codon_at(int pos) {
         t_pos = pos + i;
         if (t_pos >= seq_.size())
             t_pos -= seq_.size();
-        if (seq_[t_pos] == '1')
+        if (seq_[length() - t_pos - 1] == true)
             value += 1 << (CODON_SIZE - i - 1);
     }
 

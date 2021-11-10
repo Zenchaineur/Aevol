@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <zlib.h>
+#include <bitset>
 
 #include "Threefry.h"
 #include "aevol_constants.h"
@@ -38,6 +39,6 @@ public:
     bool protein_stop(int pos);
 
     int codon_at(int pos);
-
-    std::vector<char> seq_;
+    const int seq_len = 5000;
+    std::bitset<5000> seq_;
 };
