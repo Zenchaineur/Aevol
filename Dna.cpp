@@ -125,6 +125,7 @@ void Dna::do_duplication(int pos_1, int pos_2, int pos_3) {
 int Dna::promoter_at(int pos) {
     int prom_dist[PROM_SIZE];
 
+    #pragma omp simd
     for (int motif_id = 0; motif_id < PROM_SIZE; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size())
@@ -169,6 +170,7 @@ int Dna::terminator_at(int pos) {
     // store value of length() in variable _length before the loop
     const int _length = length();
     int term_dist[TERM_STEM_SIZE];
+    #pragma omp simd
     for (int motif_id = 0; motif_id < TERM_STEM_SIZE; motif_id++) {
         int right = pos + motif_id;
         int left = pos + (TERM_SIZE - 1) - motif_id;

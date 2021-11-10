@@ -30,6 +30,7 @@ if ( USE_CUDA )
 endif ( USE_CUDA )
 
 if ( USE_OMP )
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mavx2 -fopt-info-vec")
     find_package(OpenMP REQUIRED)
 endif ( USE_OMP )
 
