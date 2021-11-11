@@ -40,43 +40,16 @@ void Dna::do_switch(int pos) {
 }
 
 int Dna::promoter_at(int pos) {
-    int prom_dist[PROM_SIZE];
-
+    std::bitset<PROM_SIZE> prom_dist_bit;
     for (int motif_id = 0; motif_id < PROM_SIZE; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size())
             search_pos -= seq_.size();
         // Searching for the promoter
-        prom_dist[motif_id] =
-                prom_bitset[PROM_SIZE - motif_id - 1] == seq_[length() - search_pos - 1] ? 0 : 1;
-
+        prom_dist_bit[PROM_SIZE - motif_id - 1] = seq_[length() - search_pos - 1];
     }
 
-
-    // Computing if a promoter exists at that position
-    int dist_lead = prom_dist[0] +
-                    prom_dist[1] +
-                    prom_dist[2] +
-                    prom_dist[3] +
-                    prom_dist[4] +
-                    prom_dist[5] +
-                    prom_dist[6] +
-                    prom_dist[7] +
-                    prom_dist[8] +
-                    prom_dist[9] +
-                    prom_dist[10] +
-                    prom_dist[11] +
-                    prom_dist[12] +
-                    prom_dist[13] +
-                    prom_dist[14] +
-                    prom_dist[15] +
-                    prom_dist[16] +
-                    prom_dist[17] +
-                    prom_dist[18] +
-                    prom_dist[19] +
-                    prom_dist[20] +
-                    prom_dist[21];
-
+    int dist_lead = (prom_dist_bit ^ prom_bitset).count();
     return dist_lead;
 }
 
@@ -95,7 +68,8 @@ int Dna::terminator_at(int pos) {
         if (left >= _length) left -= _length;
 
         // Search for the terminators
-        term_dist[motif_id] = seq_[length() - right - 1] != seq_[length() - left - 1] ? 1 : 0;
+        // term_dist[motif_id] = seq_[length() - right - 1] != seq_[length() - left - 1] ? 1 : 0;
+        term_dist[motif_id] = seq_[length() - right - 1] != seq_[length() - left - 1];
     }
     int dist_term_lead = term_dist[0] +
                          term_dist[1] +
