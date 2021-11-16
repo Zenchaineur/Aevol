@@ -19,18 +19,24 @@ int Dna::length() const {
 
 void Dna::save(gzFile backup_file) {
     int dna_length = length();
+    std::vector<char> seq_char;
+    for(int i = 0; i < seq_.size(); i++){
+        char c = seq_[seq_len - i - 1] + '0';
+        seq_char.push_back(c);
+    }
     gzwrite(backup_file, &dna_length, sizeof(dna_length));
-    gzwrite(backup_file, &seq_, dna_length * sizeof(seq_[0]));
+    gzwrite(backup_file, seq_char.data(), dna_length * sizeof(seq_char[0]));
 }
 
 void Dna::load(gzFile backup_file) {
     int dna_length;
     gzread(backup_file, &dna_length, sizeof(dna_length));
-
     char tmp_seq[dna_length];
     gzread(backup_file, tmp_seq, dna_length * sizeof(tmp_seq[0]));
-
-    // seq_ = std::bitset<5000>(tmp_seq, tmp_seq + dna_length);
+    std::vector<char> seq_char = std::vector<char>(tmp_seq, tmp_seq + dna_length);
+    for(int i = 0; i < seq_char.size(); i++){
+        seq_[seq_len - i - 1] = bool(seq_char[i] - '0');
+    }
 }
 
 void Dna::do_switch(int pos) {
