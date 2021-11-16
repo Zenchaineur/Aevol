@@ -32,9 +32,14 @@ def generate_graph():
     fig1, ax1 = plt.subplots()
     ax1.set_title(m.group(2) + " " + m.group(3) + " itérations")
     ax1.boxplot(joined_data, labels=joined_labels)
-    
+    (bottom, top) = ax1.get_ylim()
+    print(bottom,top)
+    ax1.set_ylim(0.0, 12)
+    plt.xticks(fontsize=8)
     plt.savefig("graph.png")
     plt.show()
+
+    
 
 
 generate_graph()
