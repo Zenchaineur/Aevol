@@ -68,6 +68,8 @@ ExpManager::ExpManager(int grid_height, int grid_width, int seed, double mutatio
 
     mutation_rate_ = mutation_rate;
 
+    best_fitness_ = 0.0;
+
     // Building the target environment
     auto *g1 = new Gaussian(1.2, 0.52, 0.12);
     auto *g2 = new Gaussian(-1.4, 0.5, 0.07);
@@ -112,6 +114,8 @@ ExpManager::ExpManager(int grid_height, int grid_width, int seed, double mutatio
 
         r_compare = round((random_organism->metaerror - geometric_area) * 1E10) / 1E10;
     }
+    best_fitness_ = internal_organisms_[0]->fitness;
+    idx_best_ = 0;
 
 //    internal_organisms_[0]->print_info();
 
@@ -382,15 +386,13 @@ void ExpManager::run_a_step() {
     }
 
     // Search for the best
-    double best_fitness = prev_internal_organisms_[0]->fitness;
-    int idx_best = 0;
-    for (int indiv_id = 1; indiv_id < nb_indivs_; indiv_id++) {
-        if (prev_internal_organisms_[indiv_id]->fitness > best_fitness) {
-            idx_best = indiv_id;
-            best_fitness = prev_internal_organisms_[indiv_id]->fitness;
+    for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
+        if (dna_mutator_array_[indiv_id]->hasMutate() && prev_internal_organisms_[indiv_id]->fitness > best_fitness_) {
+            idx_best_ = indiv_id;
+            best_fitness_ = prev_internal_organisms_[indiv_id]->fitness;
         }
     }
-    best_indiv = prev_internal_organisms_[idx_best];
+    best_indiv = prev_internal_organisms_[idx_best_];
 
     // Stats
     stats_best->reinit(AeTime::time());

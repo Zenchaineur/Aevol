@@ -87,4 +87,7 @@ private:
     double mutation_rate_;
 
     int backup_step_;
+
+    double best_fitness_;
+    int idx_best_;
 };
