@@ -5,6 +5,7 @@
 #include "Dna.h"
 
 #include <cassert>
+#include <bitset>
 
 Dna::Dna(int length, Threefry::Gen &&rng) : seq_(length) {
     // Generate a random genome
@@ -123,42 +124,16 @@ void Dna::do_duplication(int pos_1, int pos_2, int pos_3) {
 }
 
 int Dna::promoter_at(int pos) {
-    int prom_dist[PROM_SIZE];
-
+    
+    int dist_lead = 0;
     for (int motif_id = 0; motif_id < PROM_SIZE; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size())
             search_pos -= seq_.size();
         // Searching for the promoter
-        prom_dist[motif_id] =
-                PROM_SEQ[motif_id] == seq_[search_pos] ? 0 : 1;
-
+        //prom_dist.set(motif_id, PROM_SEQ[motif_id] != seq_[search_pos]);
+        if(PROM_SEQ[motif_id] != seq_[search_pos]) dist_lead++;
     }
-
-
-    // Computing if a promoter exists at that position
-    int dist_lead = prom_dist[0] +
-                    prom_dist[1] +
-                    prom_dist[2] +
-                    prom_dist[3] +
-                    prom_dist[4] +
-                    prom_dist[5] +
-                    prom_dist[6] +
-                    prom_dist[7] +
-                    prom_dist[8] +
-                    prom_dist[9] +
-                    prom_dist[10] +
-                    prom_dist[11] +
-                    prom_dist[12] +
-                    prom_dist[13] +
-                    prom_dist[14] +
-                    prom_dist[15] +
-                    prom_dist[16] +
-                    prom_dist[17] +
-                    prom_dist[18] +
-                    prom_dist[19] +
-                    prom_dist[20] +
-                    prom_dist[21];
 
     return dist_lead;
 }
@@ -166,36 +141,34 @@ int Dna::promoter_at(int pos) {
 // Given a, b, c, d boolean variable and X random boolean variable,
 // a terminator look like : a b c d X X !d !c !b !a
 int Dna::terminator_at(int pos) {
-    int term_dist[TERM_STEM_SIZE];
+    // store value of length() in variable _length before the loop
+    const int _length = length();
+    int dist_term_lead = 0;
     for (int motif_id = 0; motif_id < TERM_STEM_SIZE; motif_id++) {
         int right = pos + motif_id;
         int left = pos + (TERM_SIZE - 1) - motif_id;
 
         // loop back the dna inf needed
-        if (right >= length()) right -= length();
-        if (left >= length()) left -= length();
+        if (right >= _length) right -= _length;
+        if (left >= _length) left -= _length;
 
         // Search for the terminators
-        term_dist[motif_id] = seq_[right] != seq_[left] ? 1 : 0;
+        if(seq_[right] != seq_[left]) dist_term_lead++;
     }
-    int dist_term_lead = term_dist[0] +
-                         term_dist[1] +
-                         term_dist[2] +
-                         term_dist[3];
 
     return dist_term_lead;
 }
 
-
 bool Dna::shine_dal_start(int pos) {
     int shine_start_dist[SHINE_DAL_SIZE];
 
+    #pragma omp paralel for 
     for (int motif_id = 0; motif_id < SHINE_DAL_SIZE; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size()){
             search_pos -= seq_.size();
         }
-        if((SHINE_DAL_SEQ[motif_id] != seq_[search_pos])&&((motif_id < 7)||(motif_id>10)))
+        if((seq_[search_pos] != SHINE_DAL_SEQ[motif_id])&&((motif_id < 7)||(motif_id>10)))
         {
             return false;
         }
@@ -206,13 +179,13 @@ bool Dna::shine_dal_start(int pos) {
 bool Dna::protein_stop(int pos) {
     int protein_stop_dist[3];
 
-
+    #pragma omp paralel for 
     for (int motif_id = 0; motif_id < 3; motif_id++) {
         int search_pos = pos + motif_id;
         if (search_pos >= seq_.size()){
             search_pos -= seq_.size();
         }
-        if(PROTEIN_END[motif_id]!=seq_[search_pos]){
+        if(seq_[search_pos] != PROTEIN_END[motif_id]){
             return false;
         }
     }
