@@ -417,6 +417,7 @@ void ExpManager::run_evolution(int nb_gen) {
     TIMESTAMP(0, {
         for (int indiv_id = 0; indiv_id < nb_indivs_; indiv_id++) {
             internal_organisms_[indiv_id]->locate_promoters();
+            internal_organisms_[indiv_id]->locate_shine_dals();
             prev_internal_organisms_[indiv_id]->evaluate(target);
             prev_internal_organisms_[indiv_id]->compute_protein_stats();
         }

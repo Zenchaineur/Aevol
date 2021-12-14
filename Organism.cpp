@@ -51,6 +51,7 @@ Organism::Organism(const std::shared_ptr<Organism> &clone) {
     rna_count_ = 0;
     dna_ = new Dna(*(clone->dna_));
     promoters_ = clone->promoters_;
+    shine_dals = clone->shine_dals;
 }
 
 /**
@@ -148,6 +149,11 @@ void Organism::locate_promoters() {
     look_for_new_promoters_starting_between(0, length());
 }
 
+void Organism::locate_shine_dals() {
+    look_for_new_shine_dals_starting_between(0, length());
+}
+
+
 /**
  * Apply all the mutation events of the organism on its DNA
  */
@@ -171,6 +177,16 @@ void Organism::evaluate(const double *target) {
     compute_phenotype();
     compute_fitness(target);
 }
+
+void Organism::evaluate_init(const double *target) {
+    compute_RNA();
+    search_start_protein_init();
+    compute_protein();
+    translate_protein();
+    compute_phenotype();
+    compute_fitness(target);
+}
+
 
 void Organism::compute_RNA() {
     proteins.clear();
@@ -239,6 +255,36 @@ void Organism::search_start_protein() {
             c_pos += PROM_SIZE;
             loop_back(c_pos);
 
+            auto lb = shine_dals.lower_bound(c_pos);
+            auto ub = shine_dals.upper_bound(rna->end);
+
+
+            if(rna->end < c_pos) {
+                for (auto it = lb; it != shine_dals.end(); it++) {
+                    rna->start_prot.push_back(*it);
+                }
+                for (auto it = shine_dals.begin(); it != ub; it++) {
+                    rna->start_prot.push_back(*it);
+                }
+            } else {
+                for (auto it = lb; it != ub; it++) {
+                    rna->start_prot.push_back(*it);
+                }
+            }
+            
+        }
+    }
+}
+
+void Organism::search_start_protein_init() {
+    for (int rna_idx = 0; rna_idx < rna_count_; rna_idx++) {
+        const auto &rna = rnas[rna_idx];
+        int c_pos = rna->begin;
+
+        if (rna->length >= PROM_SIZE) {
+            c_pos += PROM_SIZE;
+            loop_back(c_pos);
+
             while (c_pos != rna->end) {
                 if (dna_->shine_dal_start(c_pos)) {
                     rna->start_prot.push_back(c_pos);
@@ -250,6 +296,7 @@ void Organism::search_start_protein() {
         }
     }
 }
+
 
 void Organism::compute_protein() {
     int resize_to = 0;
@@ -587,10 +634,12 @@ bool Organism::do_switch(int pos) {
 
     // Remove promoters containing the switched base
     remove_promoters_around(pos, mod(pos + 1, length()));
+    remove_shine_dals_around(pos, mod(pos + 1, length()));
 
     // Look for potential new promoters containing the switched base
     if (length() >= PROM_SIZE)
         look_for_new_promoters_around(pos, mod(pos + 1, length()));
+        look_for_new_shine_dals_around(pos, mod(pos + 1, length()));
 
     return true;
 }
@@ -604,6 +653,17 @@ void Organism::remove_promoters_around(int32_t pos) {
     }
 }
 
+void Organism::remove_shine_dals_around(int32_t pos) {
+    if (dna_->length() >= SD_TO_START) {
+        remove_shine_dals_starting_between(mod(pos - SD_TO_START + 1, dna_->length()), 
+                                          pos);
+    } else {
+        remove_all_shine_dals();
+    }
+}
+
+
+
 void Organism::remove_promoters_around(int32_t pos_1, int32_t pos_2) {
     if (mod(pos_1 - pos_2, dna_->length()) >= PROM_SIZE) {
         remove_promoters_starting_between(mod(pos_1 - PROM_SIZE + 1, dna_->length()),
@@ -613,12 +673,30 @@ void Organism::remove_promoters_around(int32_t pos_1, int32_t pos_2) {
     }
 }
 
+void Organism::remove_shine_dals_around(int32_t pos_1, int32_t pos_2) {
+    if (mod(pos_1 - pos_2, dna_->length()) >= SD_TO_START) {
+        remove_shine_dals_starting_between(mod(pos_1 - SD_TO_START + 1, dna_->length()), 
+                                          pos_2);
+    } else {
+        remove_all_shine_dals();
+    }
+}
+
+
 void Organism::look_for_new_promoters_around(int32_t pos_1, int32_t pos_2) {
     if (dna_->length() >= PROM_SIZE) {
         look_for_new_promoters_starting_between(mod(pos_1 - PROM_SIZE + 1, dna_->length()),
                                                 pos_2);
     }
 }
+
+void Organism::look_for_new_shine_dals_around(int32_t pos_1, int32_t pos_2) {
+    if (dna_->length() >= SD_TO_START) {
+        look_for_new_shine_dals_starting_between(mod(pos_1 - SD_TO_START + 1, dna_->length()),
+                                                pos_2);
+    }
+}
+
 
 void Organism::look_for_new_promoters_around(int32_t pos) {
     if (dna_->length() >= PROM_SIZE) {
@@ -627,9 +705,22 @@ void Organism::look_for_new_promoters_around(int32_t pos) {
     }
 }
 
+void Organism::look_for_new_shine_dals_around(int32_t pos) {
+    if (dna_->length() >= SD_TO_START) {
+        look_for_new_shine_dals_starting_between(mod(pos - SD_TO_START + 1, dna_->length()),
+                                                pos);
+    }
+}
+
+
 void Organism::remove_all_promoters() {
     promoters_.clear();
 }
+
+void Organism::remove_all_shine_dals() {
+    shine_dals.clear();
+}
+
 
 /** REMOVE **/
 void Organism::remove_promoters_starting_between(int32_t pos_1, int32_t pos_2) {
@@ -642,14 +733,36 @@ void Organism::remove_promoters_starting_between(int32_t pos_1, int32_t pos_2) {
     }
 }
 
+void Organism::remove_shine_dals_starting_between(int32_t pos_1, int32_t pos_2) {
+    if (pos_1 > pos_2) {
+        remove_shine_dals_starting_after(pos_1);
+        remove_shine_dals_starting_before(pos_2);
+    } else {
+        // suppression is in [pos1, pos_2[, pos_2 is excluded
+        shine_dals.erase(shine_dals.lower_bound(pos_1), shine_dals.upper_bound(pos_2 - 1));
+    }
+}
+
+
 void Organism::remove_promoters_starting_after(int32_t pos) {
     promoters_.erase(promoters_.lower_bound(pos), promoters_.end());
 }
+
+void Organism::remove_shine_dals_starting_after(int32_t pos) {
+    shine_dals.erase(shine_dals.lower_bound(pos), shine_dals.end());
+}
+
 
 void Organism::remove_promoters_starting_before(int32_t pos) {
     // suppression is in [0, pos[, pos is excluded
     promoters_.erase(promoters_.begin(), promoters_.upper_bound(pos - 1));
 }
+
+void Organism::remove_shine_dals_starting_before(int32_t pos) {
+    // suppression is in [0, pos[, pos is excluded
+    shine_dals.erase(shine_dals.begin(), shine_dals.upper_bound(pos - 1));
+}
+
 
 void Organism::add_new_promoter(int32_t position, int8_t error) {
     // TODO: Insertion should not always occur, especially if promoter become better or worse ?
@@ -657,6 +770,11 @@ void Organism::add_new_promoter(int32_t position, int8_t error) {
     if (promoters_.find(position) == promoters_.end())
         promoters_[position] = error;
 }
+
+void Organism::add_new_shine_dals(int32_t position) {
+    shine_dals.insert(position);
+}
+
 
 void Organism::look_for_new_promoters_starting_between(int32_t pos_1, int32_t pos_2) {
     // When pos_1 > pos_2, we will perform the search in 2 steps.
@@ -679,6 +797,23 @@ void Organism::look_for_new_promoters_starting_between(int32_t pos_1, int32_t po
     }
 }
 
+void Organism::look_for_new_shine_dals_starting_between(int32_t pos_1, int32_t pos_2) {
+    // When pos_1 > pos_2, we will perform the search in 2 steps.
+    // As positions  0 and dna_->length() are equivalent, it's preferable to
+    // keep 0 for pos_1 and dna_->length() for pos_2.
+    if (pos_1 >= pos_2) {
+        look_for_new_shine_dals_starting_after(pos_1);
+        look_for_new_shine_dals_starting_before(pos_2);
+        return;
+    }
+
+    for (int32_t i = pos_1; i < pos_2; i++) {
+        if (dna_->shine_dal_start(i))
+            add_new_shine_dals(i);
+    }
+}
+
+
 void Organism::look_for_new_promoters_starting_after(int32_t pos) {
     for (int32_t i = pos; i < dna_->length(); i++) {
         int dist = dna_->promoter_at(i);
@@ -688,6 +823,14 @@ void Organism::look_for_new_promoters_starting_after(int32_t pos) {
         }
     }
 }
+
+void Organism::look_for_new_shine_dals_starting_after(int32_t pos) {
+    for (int32_t i = pos; i < dna_->length(); i++) {
+        if (dna_->shine_dal_start(i))
+            add_new_shine_dals(i);
+    }
+}
+
 
 void Organism::look_for_new_promoters_starting_before(int32_t pos) {
     // Hamming distance of the sequence from the promoter consensus
@@ -701,6 +844,14 @@ void Organism::look_for_new_promoters_starting_before(int32_t pos) {
         }
     }
 }
+
+void Organism::look_for_new_shine_dals_starting_before(int32_t pos) {
+    for (int32_t i = 0; i < pos; i++) {
+        if (dna_->shine_dal_start(i))
+            add_new_shine_dals(i);
+    }
+}
+
 
 // Printings
 

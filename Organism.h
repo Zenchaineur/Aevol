@@ -67,7 +67,13 @@ public:
 
     void locate_promoters();
 
+    void locate_shine_dals();
+
     void evaluate(const double* target);
+
+    void evaluate_init(const double* target);
+
+
 
     // Printings
     void print_info();
@@ -77,6 +83,7 @@ public:
     std::map<int, ErrorType> promoters_;
 
     std::set<int> terminators;
+    std::set<int> shine_dals;
     std::vector<RNA *> rnas;
     std::vector<Protein *> proteins;
 
@@ -106,6 +113,7 @@ private:
     // Evaluation
     void compute_RNA();
     void search_start_protein();
+    void search_start_protein_init();
     void compute_protein();
     void translate_protein();
     void compute_phenotype();
@@ -115,28 +123,40 @@ private:
     bool do_switch(int pos);
 
     void remove_all_promoters();
+    void remove_all_shine_dals();
 
     void remove_promoters_around(int32_t pos);
+    void remove_shine_dals_around(int32_t pos);
 
     void remove_promoters_around(int32_t pos_1, int32_t pos_2);
+    void remove_shine_dals_around(int32_t pos_1, int32_t pos_2);
 
     void remove_promoters_starting_between(int32_t pos_1, int32_t pos_2);
+    void remove_shine_dals_starting_between(int32_t pos_1, int32_t pos_2);
 
     void remove_promoters_starting_after(int32_t pos);
+    void remove_shine_dals_starting_after(int32_t pos);
 
     void remove_promoters_starting_before(int32_t pos);
+    void remove_shine_dals_starting_before(int32_t pos);
 
     void look_for_new_promoters_around(int32_t pos_1, int32_t pos_2);
+    void look_for_new_shine_dals_around(int32_t pos_1, int32_t pos_2);
 
     void look_for_new_promoters_around(int32_t pos);
+    void look_for_new_shine_dals_around(int32_t pos);
 
     void look_for_new_promoters_starting_between(int32_t pos_1, int32_t pos_2);
+    void look_for_new_shine_dals_starting_between(int32_t pos_1, int32_t pos_2);
 
     void look_for_new_promoters_starting_after(int32_t pos);
+    void look_for_new_shine_dals_starting_after(int32_t pos);
 
     void look_for_new_promoters_starting_before(int32_t pos);
+    void look_for_new_shine_dals_starting_before(int32_t pos);
 
     void add_new_promoter(int32_t position, int8_t error);
+    void add_new_shine_dals(int32_t position);
 
     static inline int32_t mod(int32_t a, int32_t b) {
 

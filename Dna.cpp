@@ -189,44 +189,35 @@ int Dna::terminator_at(int pos) {
 }
 
 bool Dna::shine_dal_start(int pos) {
-    bool start = false;
-    int t_pos, k_t;
+    int shine_start_dist[SHINE_DAL_SIZE];
 
-    for (int k = 0; k < SHINE_DAL_SIZE + CODON_SIZE; k++) {
-        k_t = k >= SHINE_DAL_SIZE ? k + SD_START_SPACER : k;
-        t_pos = pos + k_t;
-        if (t_pos >= seq_.size())
-            t_pos -= seq_.size();
-
-        if (seq_[t_pos] == SHINE_DAL_SEQ[k_t]) {
-            start = true;
-        } else {
-            start = false;
-            break;
+    for (int motif_id = 0; motif_id < SHINE_DAL_SIZE; motif_id++) {
+        int search_pos = pos + motif_id;
+        if (search_pos >= seq_.size()){
+            search_pos -= seq_.size();
+        }
+        if((SHINE_DAL_SEQ[motif_id] != seq_[search_pos])&&((motif_id < 7)||(motif_id>10)))
+        {
+            return false;
         }
     }
-
-    return start;
+    return true;
 }
 
 bool Dna::protein_stop(int pos) {
-    bool is_protein;
-    int t_k;
+    int protein_stop_dist[3];
 
-    for (int k = 0; k < CODON_SIZE; k++) {
-        t_k = pos + k;
-        if (t_k >= seq_.size())
-            t_k -= seq_.size();
 
-        if (seq_[t_k] == PROTEIN_END[k]) {
-            is_protein = true;
-        } else {
-            is_protein = false;
-            break;
+    for (int motif_id = 0; motif_id < 3; motif_id++) {
+        int search_pos = pos + motif_id;
+        if (search_pos >= seq_.size()){
+            search_pos -= seq_.size();
+        }
+        if(PROTEIN_END[motif_id]!=seq_[search_pos]){
+            return false;
         }
     }
-
-    return is_protein;
+    return true;
 }
 
 int Dna::codon_at(int pos) {
